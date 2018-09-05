@@ -106,6 +106,8 @@
 (defn client-component [id client]
   (let [active-client? @(rf/subscribe [:active-client? id])]
      [:div
+       [:button.btn {:on-click #(rf/dispatch [:unactive-client id])} "\u2212"]
+       [:button.btn {:on-click #(rf/dispatch [:active-client id])} "\u002B"]
        [:a {:on-click (fn[e]
                         (.preventDefault e)
                         (if active-client?
@@ -119,7 +121,6 @@
         "♥"]
 
       " "(:name client)]))
-
 
 (defn clients-panel
   []
