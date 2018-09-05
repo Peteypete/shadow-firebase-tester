@@ -1,0 +1,29 @@
+{
+  "name": "shadow-firebase",
+  "version": "0.0.1",
+  "description": "shadow-cljs and firebase example",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jacekschae/shadow-firebase"
+  },
+  "author": {
+    "name": "Jacek Schae",
+    "email": "jacek.schae@gmail.com"
+  },
+  "license": "MIT",
+  "scripts": {
+    "dev": "shadow-cljs watch app;",
+    "release": "shadow-cljs release app;",
+    "server": "shadow-cljs server;",
+    "clean": "rm -rf target; rm -rf public/js"
+  },
+  "dependencies": {
+    "create-react-class": "^15.6.3",
+    "firebase": "^4.13.1",
+    "react": "^16.3.2",
+    "react-dom": "^16.3.2"
+  },
+  "devDependencies": {
+    "shadow-cljs": "^2.3.23"
+  }
+}
