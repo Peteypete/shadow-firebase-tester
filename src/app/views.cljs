@@ -77,48 +77,39 @@
    (:clients db)))
 
 (rf/reg-sub
- :active-client
+ :favorite-client
  (fn [db]
-  (get-in db [:user :active-client] #{})))
+  (get-in db [:user :favorite-client] #{})))
 
 (rf/reg-sub
- :active-client?
+ :favorite-client?
  (fn []
-   (rf/subscribe [:active-client]))
- (fn [active-client [_ id]]
-   (contains? active-client id)))
+   (rf/subscribe [:favorite-client]))
+ (fn [favorite-client [_ id]]
+   (contains? favorite-client id)))
 
 (rf/reg-event-db
  :initialize-clients
  (fn [db]
    (assoc db :clients clients)))
 
-(rf/reg-event-db
- :active-client
- (fn [db [_ id]]
-     (update-in db [:user :active-client] (fnil conj #{}) id)))
-
-(rf/reg-event-db
- :unactive-client
- (fn [db [_ id]]
-     (update-in db [:user :active-client] disj id)))
 
 (defn client-component [id client]
-  (let [active-client? @(rf/subscribe [:active-client? id])]
+  (let [favorite-client? @(rf/subscribe [:favorite-client? id])]
      [:div
-       [:button.btn {:on-click #(rf/dispatch [:unactive-client id])} "\u2212"]
-       [:button.btn {:on-click #(rf/dispatch [:active-client id])} "\u002B"]
+       [:button.btn {:on-click #(rf/dispatch [:unfavorite-client id])} "\u2212"]
+       [:button.btn {:on-click #(rf/dispatch [:favorite-client id])} "\u002B"]
        [:a {:on-click (fn[e]
                         (.preventDefault e)
-                        (if active-client?
-                          (rf/dispatch [:unactive-client id])
-                          (rf/dispatch [:active-client id])))
+                        (if favorite-client?
+                          (rf/dispatch [:unfavorite-client id])
+                          (rf/dispatch [:favorite-client id])))
             :href "#"
-            :style {:color (if active-client?
-                             :red
+            :style {:color (if favorite-client?
+                             :orange
                              :grey)
                     :text-decoration :none}}
-        "♥"]
+        "★"]
 
       " "(:name client)]))
 
@@ -135,8 +126,8 @@
      [:h4 ":clients state"]
      (pr-str @(rf/subscribe [:clients]))]
     [:div
-     [:h4 ":active-client state"]
-     (pr-str @(rf/subscribe [:active-client]))]]])
+     [:h4 ":favorite-client state"]
+     (pr-str @(rf/subscribe [:favorite-client]))]]])
 
 (defn app []
   [:div
