@@ -28,11 +28,6 @@
       (when-not (= @state/counter 0)
         [:p [:button.btn {:on-click #(reset)} "reset"]])])])
 
-
-
-
-
-
 ;code based on Eric Normand "Understanding R-frame Lesson 27 and 28"
 
 (def clients {:client-01 {:id :client-01
@@ -92,7 +87,6 @@
  :initialize-clients
  (fn [db]
    (assoc db :clients clients)))
-
 
 (defn client-component [id client]
   (let [favorite-client? @(rf/subscribe [:favorite-client? id])]
