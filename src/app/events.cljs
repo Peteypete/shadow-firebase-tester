@@ -44,14 +44,4 @@
  (fn [db [_ id]]
      (update-in db [:user :favorite-client] disj id)))
 
-
-;sample write to datbase from David Goldfarb re-frame firebase
-(rf/reg-event-fx
-  :write-status
-  (fn [{db :db} [_ status]]
-    {:firebase/write {:path [:status]
-                      :value status
-                      :on-success #(js/console.log "Wrote status")
-                      :on-failure [:handle-failure]}}))
-
 (rf/dispatch [:initialize-clients])

@@ -88,8 +88,6 @@
  (fn [db]
    (assoc db :clients clients)))
 
-;from re-frame-firebase
-(rf/subscribe [:firebase/on-value {:path [:latest-message]}])
 
 (defn client-component [id client]
   (let [favorite-client? @(rf/subscribe [:favorite-client? id])]
