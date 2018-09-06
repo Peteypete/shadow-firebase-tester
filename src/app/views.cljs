@@ -1,7 +1,7 @@
 (ns app.views
   (:require [re-frame.core :as rf]
             [app.state :as state]
-            [app.events :refer [increment decrement reset]]
+            [app.events]
             [app.fb.auth :as fb-auth]))
 
 (defn header
@@ -22,11 +22,11 @@
      [:div.banner
       [:p
        [:button.btn {:on-click #(fb-auth/sign-out)} "Logout"]]
-      [:button.btn {:on-click #(decrement)} "\u2212"]
-      [:button.btn {:on-click #(reset)} @state/counter]
-      [:button.btn {:on-click #(increment)} "\u002B"]
+      [:button.btn {:on-click #(rf/dispatch [:decrement])} "\u2212"]
+      [:button.btn {:on-click #(rf/dispatch [:reset])} @state/counter]
+      [:button.btn {:on-click #(rf/dispatch [:increment])} "\u002B"]
       (when-not (= @state/counter 0)
-        [:p [:button.btn {:on-click #(reset)} "reset"]])])])
+        [:p [:button.btn {:on-click #(rf/dispatch [:reset])} "reset"]])])])
 
 ;code based on Eric Normand "Understanding R-frame Lesson 27 and 28"
 
@@ -87,6 +87,9 @@
  :initialize-clients
  (fn [db]
    (assoc db :clients clients)))
+
+;from re-frame-firebase
+(rf/subscribe [:firebase/on-value {:path [:latest-message]}])
 
 (defn client-component [id client]
   (let [favorite-client? @(rf/subscribe [:favorite-client? id])]
