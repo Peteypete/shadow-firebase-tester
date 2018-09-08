@@ -16,6 +16,7 @@
 ;  []
 ;  (fb-db/save! ["counter"] (reset! state/counter 0)))
 
+
 ;rewrite as re-frame event
 (rf/reg-event-db
  :increment
@@ -40,8 +41,47 @@
      (update-in db [:user :favorite-client] (fnil conj #{}) id)))
 
 (rf/reg-event-db
- :unfavorite-client
- (fn [db [_ id]]
-     (update-in db [:user :favorite-client] disj id)))
+  :unfavorite-client
+  (fn [db [_ id]]
+      (update-in db [:user :favorite-client] disj id)))
 
-(rf/dispatch [:initialize-clients])
+
+
+;version from backgammon
+
+(defn db-save! [ref data]
+  (.set ref data))
+
+(rf/reg-fx
+ :firebase/set
+ (fn [{:keys [game-id data]}]
+   (db-save! (fb-db/db-ref [game-id]) data)))
+
+(rf/reg-event-fx
+ :decrement2
+  (fn [{:keys [db]} _]
+   (let [counter #{}]
+     {:firebase/set {:game-id "counter"
+                     :data (swap! state/counter dec)}})))
+
+(rf/reg-event-fx
+ :increment2
+ (fn [{:keys [db]} _]
+   (let [counter #{}]
+     {:firebase/set {:game-id "counter"
+                     :data (swap! state/counter inc)}})))
+
+
+(rf/reg-event-fx
+ :reset2
+ (fn [{:keys [db]} _]
+   (let [counter #{}]
+     {:firebase/set {:game-id "counter"
+                     :data (reset! state/counter 3)}})))
+
+(rf/reg-event-fx
+ :favorite-client2
+ (fn [{:keys [db]} [_ id]]
+   (let [id ()]
+     {:firebase/set {:game-id "user/favorite-client"
+                     :data (swap! state/counter inc)}})))

@@ -22,11 +22,11 @@
      [:div.banner
       [:p
        [:button.btn {:on-click #(fb-auth/sign-out)} "Logout"]]
-      [:button.btn {:on-click #(rf/dispatch [:decrement])} "\u2212"]
-      [:button.btn {:on-click #(rf/dispatch [:reset])} @state/counter]
-      [:button.btn {:on-click #(rf/dispatch [:increment])} "\u002B"]
+      [:button.btn {:on-click #(rf/dispatch [:decrement2])} "\u2212"]
+      [:button.btn {:on-click #(rf/dispatch [:reset2])} @state/counter]
+      [:button.btn {:on-click #(rf/dispatch [:increment2])} "\u002B"]
       (when-not (= @state/counter 0)
-        [:p [:button.btn {:on-click #(rf/dispatch [:reset])} "reset"]])])])
+        [:p [:button.btn {:on-click #(rf/dispatch [:reset2])} "reset"]])])])
 
 ;code based on Eric Normand "Understanding R-frame Lesson 27 and 28"
 
@@ -74,7 +74,7 @@
 (rf/reg-sub
  :favorite-client
  (fn [db]
-  (get-in db [:user :favorite-client] #{})))
+  (get-in db [:user :favorite-client] ())))
 
 (rf/reg-sub
  :favorite-client?
@@ -88,17 +88,16 @@
  (fn [db]
    (assoc db :clients clients)))
 
-
 (defn client-component [id client]
   (let [favorite-client? @(rf/subscribe [:favorite-client? id])]
      [:div
        [:button.btn {:on-click #(rf/dispatch [:unfavorite-client id])} "\u2212"]
-       [:button.btn {:on-click #(rf/dispatch [:favorite-client id])} "\u002B"]
+       [:button.btn {:on-click #(rf/dispatch [:favorite-client2 id])} "\u002B"]
        [:a {:on-click (fn[e]
                         (.preventDefault e)
                         (if favorite-client?
                           (rf/dispatch [:unfavorite-client id])
-                          (rf/dispatch [:favorite-client id])))
+                          (rf/dispatch [:favorite-client2 id])))
             :href "#"
             :style {:color (if favorite-client?
                              :orange

@@ -5,13 +5,12 @@
 
 ;; == db-ref ==================================================================
 ;; Represents a specific location in your Database and can be used for reading
-;; or writing data to the Database location, path is a vector of strings or 
+;; or writing data to the Database location, path is a vector of strings or
 ;; symbols.
 ;;
 ;; usage: (fb-db/db-ref ["counter"]))))
 ;;
-(defn db-ref
-  [path]
+(defn db-ref [path]
   (.ref (database) (str/join "/" path)))
 
 ;; == save! ===================================================================
@@ -21,8 +20,7 @@
 ;;
 ;; usage: (fb-db/save! ["counter"] 0)))
 ;;
-(defn save!
-  [path value]
+(defn save! [path value]
   (.set (db-ref path) value))
 
 ;; == subscribe-to-counter ====================================================
