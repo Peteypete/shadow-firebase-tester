@@ -29,8 +29,8 @@
      (update-in db [:user :favorite-client] disj id)))
 
 
-;sample write to datbase from David Goldfarb re-frame firebase 
-(re-frame/reg-event-fx
+;sample write to datbase from David Goldfarb re-frame firebase
+(rf/reg-event-fx
   :write-status
   (fn [{db :db} [_ status]]
     {:firebase/write {:path [:status]
