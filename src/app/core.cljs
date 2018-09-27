@@ -2,6 +2,7 @@
   (:require [reagent.core :as reagent :refer [atom]]
             [re-frame.core :as rf]
             [app.views :as views]
+            [com.degel.re-frame-firebase :as re-fire]
             [app.fb.init :refer [firebase-init]]
             [app.fb.db :as fb-db]))
 

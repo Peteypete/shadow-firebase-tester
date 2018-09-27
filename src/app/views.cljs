@@ -2,7 +2,17 @@
   (:require [re-frame.core :as rf]
             [app.state :as state]
             [app.events :refer [increment decrement reset]]
+            [com.degel.re-frame-firebase :as re-fire]
             [app.fb.auth :as fb-auth]))
+
+
+
+(defn rff-test []
+  [:div.ui.padded
+      [:div.banner [:h1 "RFF Test"
+                    [:div.four.wide.column [:div.ui.huge.primary]
+                                           (str @(rf/subscribe [:firebase/on-value {:path [:rff]}]))]]]])
+
 
 (defn header
   []
@@ -177,5 +187,6 @@
    [header]
    [:div [clients-panel]]
    [counter]])
+  ; [rff-test]])
 
 (rf/dispatch [:initialize-clients])
