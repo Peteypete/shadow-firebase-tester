@@ -3,15 +3,52 @@
             [app.state :as state]
             [app.events :refer [increment decrement reset]]
             [com.degel.re-frame-firebase :as re-fire]
-            [app.fb.auth :as fb-auth]))
-
+            [app.fb.auth :as fb-auth]
+            [reagent.core :as reagent :refer [atom]]))
 
 
 (defn rff-test []
   [:div.ui.padded
       [:div.banner [:h1 "RFF Test"
-                    [:div.four.wide.column [:div.ui.huge.primary]
-                                           (str @(rf/subscribe [:firebase/on-value {:path [:rff]}]))]]]])
+                    [:div
+                     (str @(rf/subscribe [:firebase/on-value {:path [:rff]}]))]]]])
+
+(rf/reg-event-fx
+  :write-test
+  (fn [{db :db} [_ thetest]]
+    {:firebase/write {:path [:write-test :debit]
+                      :value thetest
+                      :on-success #(js/console.log "Wrote thetest: " thetest)
+                      :on-failure [:my-empty]}}))
+
+(defn select-test
+  []
+  [:div
+   [:select
+     [:option { :value "None"} "None (Do Not Import)"
+                :on-change (fn [e] (js/console.log (str "got change e = " e)
+                                       (rf/dispatch [:write-test (str "got change e = " (:value (:target e)))])))]]])
+
+(defn atom-input [value]
+  [:form
+   [:input {:type "text"
+            :value @value
+            :on-change #(reset! value (-> % .-target .-value))}]
+
+   [:input {:on-submit (fn [e]
+                         (.preventDefault e)
+                         (rf/dispatch [:write-test (str "got change e = " (:value (:target e)))]))
+
+            :value "Submit", :type "submit"}]])
+
+
+
+(defn shared-state []
+  (let [val (atom "foo")]
+    (fn []
+      [:div
+       [:span "The value is now: " @val]
+       [:span "Change it here: " [atom-input val]]])))
 
 
 (defn header
@@ -19,8 +56,8 @@
   [:div.banner
    [:h1 "shadow-cljs + firebase"]
    (if (empty? @state/user)
-     [:p "First you need to log-in ..."]
-     [:p "... so taht you can change the state."])])
+     [:span "First you need to log-in ..."]
+     [:span "... so taht you can change the state."])])
 
 (defn counter
   []
@@ -185,8 +222,11 @@
 (defn app []
   [:div
    [header]
+   ;[rff-test]
+   [shared-state]
+   [select-test]
    [:div [clients-panel]]
    [counter]])
-  ; [rff-test]])
+
 
 (rf/dispatch [:initialize-clients])
