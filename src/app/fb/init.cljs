@@ -31,16 +31,3 @@
                   :default-error-handler  [])
     (firebase/app))
   (fb-auth/on-auth-state-changed))
-
-(defn firebase-init-deprecated
-  []
-  (if (zero? (alength firebase/apps))
-    (firebase/initializeApp
-     #js { :apiKey "AIzaSyDQsn5IIaUlpik1aUlDNaBwXXRPVBElxlQ",
-           :authDomain "fir-tester-39c24.firebaseapp.com",
-           :databaseURL  "https://fir-tester-39c24.firebaseio.com",
-           :projectId  "fir-tester-39c24",
-           :storageBucket  "fir-tester-39c24.appspot.com",
-           :messagingSenderId  "320240248272"})
-    (firebase/app))
-  (fb-auth/on-auth-state-changed))

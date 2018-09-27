@@ -1,15 +1,69 @@
 (ns app.views
-  (:require [re-frame.core :as rf]
+  (:require [reagent.core :as r]
+            [re-frame.core :as rf]
             [app.state :as state]
             [app.events :refer [increment decrement reset]]
             [com.degel.re-frame-firebase :as re-fire]
-            [app.fb.auth :as fb-auth]))
+            [app.fb.auth :as fb-auth]
+            [clojure.string :as str]))
+
 
 (defn rff-test []
   [:div.ui.padded
       [:div.banner [:h1 "RFF Test"
                     [:div.four.wide.column [:div.ui.huge.primary]
                                            (str @(rf/subscribe [:firebase/on-value {:path [:rff]}]))]]]])
+
+
+;; TODO move this to a better place
+
+(rf/reg-event-db
+ :write-local-debit
+ (fn [db [_ newval]]
+   (js/console.log ":write-local-debit: " newval)
+   (assoc db :debit newval)))
+
+(rf/reg-event-fx
+  :read-debit
+  (fn [{db :db} [_ status]]
+    {:firebase/read-once {:path [:write-test :debit]
+                          :on-success [:write-local-debit]
+                          :on-failure [:my-empty "read-debit on-failure"]}}))
+
+(rf/reg-sub
+ :debit
+ (fn [db]
+   (get-in db [:debit])))
+
+;; (rf/reg-sub
+;;  :double-local-debit
+;;  (fn [db]
+;;    (get-in db [:double-local-debit])))
+
+;; Cribbed from re-frame todoMVC example
+
+(defn text-input [{:keys [title on-save on-stop]}]
+  ;; the rf/subscribe atom is read-only, so we copy it to another atom
+  ;; CHECKME is this a race condition? putting the rf/dispatch at the end is flaky
+  (let [
+        val (r/atom title)
+        stop #(do (when on-stop (on-stop %)))
+        save #(let [v (-> @val str str/trim)]
+                (on-save v)
+                (stop %))
+        _ (js/console.log "val: " @val)]
+
+    (fn [props]
+      [:input (merge (dissoc props :on-save :on-stop :title)
+                     {:type        "text"
+                      :value       @val
+                      :on-blur     save
+                      :auto-focus  true
+                      :on-change   #(do (reset! val (-> % .-target .-value)))
+                      :on-key-down #(case (.-which %)
+                                      13 (save %)
+                                      27 (stop %)
+                                      nil)})])))
 
 (defn header
   []
@@ -94,6 +148,37 @@
  :initialize-clients
  (fn [db]
    (assoc db :clients clients)))
+
+(rf/reg-event-fx
+  :write-test
+  (fn [{db :db} [_ value & k]]
+    {:firebase/write {:path (into [:write-test] k)
+                      :value value
+                      :on-success #(js/console.log "Wrote " k " value: " value)
+                      :on-failure [:my-empty]}}))
+
+(defn editable-td-ytd-hacky-adj
+  "key-base is the account name
+  c-or-d is a keyword. Either :credit or :debit"
+  [key-base c-or-d]
+  (let [editing (r/atom false)]
+    (fn [key-base c-or-d]
+      (let [k (keyword key-base)
+            remote-value @(rf/subscribe [:firebase/on-value {:path [:write-test c-or-d k]}])
+            remote-label (str (if (empty? remote-value) "0.00" remote-value))]
+        [:td {:key (keyword (str key-base "-ytd-hacky-" (name c-or-d) "-adj"))
+              :class (str (when @editing "editing"))}
+         [:div.view
+          [:label {:on-click #(do (reset! editing true))}
+           remote-label]]
+         (when @editing
+           (js/console.log "editing")
+           [text-input
+            {:class "edit"
+             :title remote-label
+             :on-save #(if (seq %)
+                         (rf/dispatch [:write-test % c-or-d k]))
+             :on-stop #(reset! editing false)}])]))))
 
 (defn client-component [id client]
   (let [favorite-client? @(rf/subscribe [:favorite-client? id])]
